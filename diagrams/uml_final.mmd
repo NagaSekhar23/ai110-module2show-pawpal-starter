@@ -1,0 +1,78 @@
+classDiagram
+    %% frequency: once, daily, weekly. priority: low, medium, high.
+    %% PawPal+ final design - matches pawpal_system.py (AUTHORITATIVE final diagram).
+    %% uml.mmd is an identical copy kept for the grading file name.
+    %% scheduled_at is a read-only @property. Module helpers parse_date() and
+    %% parse_time() (used by Task validation) are not classes, so they are not drawn.
+
+    class Task {
+        <<dataclass>>
+        +str description
+        +date scheduled_date
+        +time scheduled_time
+        +str frequency
+        +str priority
+        +str pet_name
+        +bool completed
+        +str task_id
+        +mark_complete() bool
+        +is_recurring() bool
+        +next_occurrence() Task
+        +scheduled_at() datetime
+        +to_dict() dict
+        +from_dict(data)$ Task
+    }
+
+    class Pet {
+        <<dataclass>>
+        +str name
+        +str species
+        +str breed
+        +int age
+        +list~Task~ tasks
+        +add_task(task) Task
+        +get_tasks() list~Task~
+        +get_pending_tasks() list~Task~
+        +get_completed_tasks() list~Task~
+        +has_task_at(description, on_date, at_time) bool
+        +remove_task(task_id) bool
+        +to_dict() dict
+        +from_dict(data)$ Pet
+    }
+
+    class Owner {
+        <<dataclass>>
+        +str name
+        +str email
+        +list~Pet~ pets
+        +add_pet(pet) Pet
+        +get_pets() list~Pet~
+        +get_pet(name) Pet
+        +remove_pet(name) bool
+        +get_all_tasks() list~Task~
+        +save_to_json(path)
+        +load_from_json(path)$ Owner
+    }
+
+    class Scheduler {
+        +Owner owner
+        +get_all_tasks() list~Task~
+        +sort_by_time(tasks) list~Task~
+        +sort_by_priority(tasks) list~Task~
+        +filter_tasks(pet_name, completed, on_date, tasks) list~Task~
+        +filter_by_pet(pet_name) list~Task~
+        +filter_by_status(completed) list~Task~
+        +filter_by_date(on_date) list~Task~
+        +get_recurring_tasks() list~Task~
+        +get_daily_schedule(on_date, by_priority) list~Task~
+        +detect_conflicts(tasks, include_completed) list~str~
+        +find_task(task_id) Task
+        +complete_task(task_id) Task
+        +get_summary() dict
+    }
+
+    Owner "1" o-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : has
+    Scheduler "1" --> "1" Owner : reads tasks via get_all_tasks()
+    Scheduler ..> Task : sorts / filters / completes
+    Task ..> Task : next_occurrence() creates

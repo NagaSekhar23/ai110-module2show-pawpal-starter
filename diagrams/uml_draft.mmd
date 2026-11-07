@@ -1,0 +1,44 @@
+classDiagram
+    %% PawPal+ initial (draft) design - created before implementation.
+    %% See uml_final.mmd for the diagram that matches the finished code.
+
+    class Task {
+        +str description
+        +date scheduled_date
+        +time scheduled_time
+        +str frequency
+        +str priority
+        +bool completed
+        +mark_complete()
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +str breed
+        +int age
+        +list~Task~ tasks
+        +add_task(task)
+        +get_tasks() list~Task~
+    }
+
+    class Owner {
+        +str name
+        +list~Pet~ pets
+        +add_pet(pet)
+        +get_pets() list~Pet~
+        +get_all_tasks() list~Task~
+    }
+
+    class Scheduler {
+        +Owner owner
+        +sort_by_time() list~Task~
+        +filter_tasks() list~Task~
+        +detect_conflicts() list~str~
+        +handle_recurring(task)
+        +generate_schedule() list~Task~
+    }
+
+    Owner "1" o-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : has
+    Scheduler --> Owner : reads tasks via get_all_tasks()
